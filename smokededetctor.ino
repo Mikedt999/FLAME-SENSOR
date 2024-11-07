@@ -1,9 +1,11 @@
+#include <SoftwareSerial.h>
 #include <Wire.h>  //wire library
 #include <LiquidCrystal_I2C.h> //liquid crystal with I2C library
-#include <Servo.h> 
+#include <Servo.h>
+SoftwareSerial BTSerial(10, 11); 
 Servo myServo;  
 LiquidCrystal_I2C  lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
-int red_LED_PIN = 11;
+int red_LED_PIN = 8;
 int green_LED_PIN = 9;
 int buzzer = 4;
 const int flameSensorPin = 2;  // Ακίδα όπου συνδέεται το DO του αισθητήρα φλόγας
@@ -18,17 +20,19 @@ void setup() {
   lcd.init();                      //  initialize the lcd
        // Attach the servo motor to pin 7
  
-  lcd.backlight(); //Turn on backlight     // Ρύθμιση της ακίδας LED ως έξοδος
-  Serial.begin(9600);  
-  myServo.attach(servoPin);         // Attach the servo motor to pin 7
-  myServo.write(0);             // Έναρξη σειριακής επικοινωνίας για εντοπισμό σφαλμάτων
+  lcd.backlight(); 
+   myServo.attach(servoPin);         // Attach the servo motor to pin 7
+  myServo.write(0);             // Έναρξη σειριακής επικοινωνίας για εντοπισμό σφαλμάτων//Turn on backlight     // Ρύθμιση της ακίδας LED ως έξοδος
+  Serial.begin(9600); 
+  BTSerial.begin(9600);  
 }
+ 
 
 void loop() {
   int flameState = digitalRead(flameSensorPin);  // Ανάγνωση κατάστασης από τον αισθητήρα φλόγας
 
   if (flameState == LOW) {  // Το LOW σημαίνει ότι ανιχνεύτηκε φλόγα
-
+  BTSerial.println("Alert! Flame detected.");
  // Serial.println("Φλόγα ανιχνεύτηκε!");  // Εκτύπωσε μήνυμα στη σειριακή θύρα
   lcd.setCursor(1,0);
   lcd.print("FIRE DETECTED!");
@@ -49,7 +53,7 @@ void loop() {
 
   
 else {
-  
+  BTSerial.println("No Flame Detected.");
  //Serial.println("Καμία φλόγα.");  // Εκτύπωσε μήνυμα στη σειριακή θύρα
   digitalWrite(green_LED_PIN, HIGH);
     digitalWrite(red_LED_PIN,LOW);
